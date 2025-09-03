@@ -25,7 +25,7 @@ Predict which customers will churn in the next 30 days and rank them by risk so 
 
 End-to-end local demo: prepare → train → serve → score.
 
-FastAPI endpoint: POST /predict returns churn probabilities.
+FastAPI endpoint: POST /predict returns churn probabilities and predictions.
 
 Streamlit UI: upload CSV → sort by churn_probability → export.
 
@@ -40,11 +40,11 @@ churn-demo/
 │  ├─ telco_train.csv              # prepared training data
 │  ├─ telco_scoring_sample.csv     # sample for live scoring (no Churn column)
 ├─ models/
-│  ├─ model.joblib                 # trained classifier
-│  ├─ preprocessor.joblib          # fitted ColumnTransformer
+│  ├─ xgb_pipeline.joblib          # trained classifier
 ├─ api/
 │  ├─ main.py                      # FastAPI app (POST /predict)
 │  ├─ schema.py                    # (optional) pydantic models
+│  ├─ inference_preprocessor.py    #  preprocesses input
 ├─ app/
 │  ├─ streamlit_app.py             # simple UI for demo
 ├─ train/
@@ -89,8 +89,8 @@ python train/train.py
 
 Artifacts saved to:
 
-models/preprocessor.joblib
-models/model.joblib
+models/xgb_pipeline.joblib
+models/xgb_threshold.json
 
 
 Re-train from scratch:
@@ -155,7 +155,7 @@ Request
 
 Response
 
-{ "probabilities": [0.4123] }
+{"probabilities": [0.8470520377159119], "predictions": [1]}
 
 🧠 One-slide business summary
 

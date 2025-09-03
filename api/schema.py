@@ -9,4 +9,5 @@ class PredictRequest(BaseModel):
 
 class PredictResponse(BaseModel):
     probabilities: List[float]
+    predictions: List[int]  # 0 or 1 for each record
     

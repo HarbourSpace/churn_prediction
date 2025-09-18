@@ -21,11 +21,15 @@ from utils import TELCO_DROP_COLS, NUM_DTYPES
 # --- Load training data ---
 df = pd.read_csv("data/telco_train.csv")
 
+cat_cols = df.select_dtypes(include='object').columns
+for col in cat_cols:
+    df[col] = df[col].astype('category')
+
 if "Churn" not in df.columns:
     raise ValueError("Expected 'Churn' column in data/telco_train.csv")
 
 y = df["Churn"]
-X = df.drop(columns=TELCO_DROP_COLS, errors="ignore")
+X = df.drop(columns=["Churn"], errors="ignore")
 
 # Early sanity check
 unique_classes = sorted(y.unique().tolist())
@@ -45,11 +49,13 @@ X_train, X_val, y_train, y_val = train_test_split(
 num_cols = X_train.select_dtypes(include=NUM_DTYPES).columns.tolist()
 cat_cols = [c for c in X_train.columns if c not in num_cols]
 
-preprocessor = ColumnTransformer([
-    ("num", StandardScaler(), num_cols),
-    ("cat", OneHotEncoder(handle_unknown="ignore"), cat_cols),
-])
-
+preprocessor_logreg = ColumnTransformer(
+    transformers=[
+        ("num", StandardScaler(), num_cols),
+        ("cat", OneHotEncoder(handle_unknown="ignore"), cat_cols),
+    ],
+    remainder='passthrough'
+)
 
 # --- Baseline model: Logistic Regression + SMOTE ---
 print("\n=== Baseline: Logistic Regression + SMOTE (not saved) ===")
@@ -57,14 +63,13 @@ print("\n=== Baseline: Logistic Regression + SMOTE (not saved) ===")
 log_clf = LogisticRegression(max_iter=1000)
 
 log_pipe = ImbPipeline([
-    ("prep", preprocessor),
+    ("prep", preprocessor_logreg),
     ("smote", SMOTE(random_state=42)),
     ("clf", log_clf),
 ])
 
 # --- Fit model ---
 log_pipe.fit(X_train, y_train)
-
 # --- Evaluate on validation set ---
 y_log_pred = log_pipe.predict(X_val) # default threshold 0.5
 y_log_proba = log_pipe.predict_proba(X_val)[:, 1]
@@ -120,23 +125,26 @@ xgb = XGBClassifier(
     learning_rate=0.01,
     tree_method="hist",
     scale_pos_weight=spw,   # keep this
-    eval_metric="logloss",
-    random_state=42
+    eval_metric=["logloss"],
+    random_state=42,
+    enable_categorical=True,
 )
 
 # For tree-based models, no need to scale numerics
-preprocessor_tree = ColumnTransformer([
-    ("num", "passthrough", num_cols),  
-    ("cat", OneHotEncoder(handle_unknown="ignore"), cat_cols),
-])
+preprocessor_xgb = ColumnTransformer(
+    transformers=[
+        # Pass all columns through; XGBoost will handle them natively
+        ("pass", "passthrough", X_train.columns)
+    ]
+)
 
 xgb_pipe = SkPipeline([
-    ("prep", preprocessor_tree),
+    #("prep", preprocessor_xgb),
     ("clf", xgb),
 ])
 
 # --- Fit model ---
-xgb_pipe.fit(X_train, y_train)
+xgb_pipe.fit(X_train, y_train, clf__verbose=True, clf__eval_set=[(X_val, y_val)])
 
 # --- Evaluate on validation set ---
 y_xgb_pred = xgb_pipe.predict(X_val) # default threshold 0.5

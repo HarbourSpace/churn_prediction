@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telecom Churn Prediction Platform</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header Section -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="title">
+                    <i class="fas fa-chart-line"></i>
+                    Telecom Churn Prediction Platform
+                </h1>
+                <p class="subtitle">AI-Powered Customer Retention Analytics</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Upload Section -->
+            <section class="upload-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-upload"></i> Upload Customer Data</h2>
+                    <p>Upload a CSV file containing customer data for churn prediction analysis</p>
+                </div>
+                
+                <form id="prediction-form" class="prediction-form">
+                    <div class="form-group">
+                        <label for="csv-file" class="file-label">
+                            <i class="fas fa-file-csv"></i>
+                            <span>Choose CSV File</span>
+                            <input type="file" id="csv-file" name="csv-file" accept=".csv" required>
+                        </label>
+                        <div class="file-info" id="file-info"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="k-value">Top-K Churners to Display</label>
+                        <div class="slider-container">
+                            <input type="range" id="k-value" name="k-value" min="5" max="100" value="20" class="slider">
+                            <div class="slider-value">
+                                <span id="k-value-display">20</span> customers
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="predict-btn">
+                        <i class="fas fa-brain"></i>
+                        Predict Churn
+                    </button>
+                </form>
+            </section>
+
+            <!-- Loading Section -->
+            <section class="loading-section" id="loading-section" style="display: none;">
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <p>Analyzing customer data and generating predictions...</p>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section class="results-section" id="results-section" style="display: none;">
+                <div class="section-header">
+                    <h2><i class="fas fa-chart-bar"></i> Prediction Results</h2>
+                </div>
+                
+                <!-- Summary Cards -->
+                <div class="summary-cards" id="summary-cards">
+                    <!-- Summary cards will be populated by JavaScript -->
+                </div>
+
+                <!-- Results Table -->
+                <div class="table-container">
+                    <div class="table-header">
+                        <h3>High-Risk Customers</h3>
+                        <div class="table-actions">
+                            <button class="btn btn-secondary" id="download-csv-btn">
+                                <i class="fas fa-download"></i>
+                                Download CSV
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-wrapper">
+                        <table id="results-table" class="results-table">
+                            <thead>
+                                <tr>
+                                    <th>Customer ID</th>
+                                    <th>Churn Probability</th>
+                                    <th>Risk Level</th>
+                                    <th>Monthly Charges</th>
+                                    <th>Tenure</th>
+                                    <th>Contract</th>
+                                </tr>
+                            </thead>
+                            <tbody id="results-tbody">
+                                <!-- Results will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Report Links Section -->
+            <section class="report-section" id="report-section" style="display: none;">
+                <div class="section-header">
+                    <h2><i class="fas fa-file-alt"></i> Generated Reports</h2>
+                </div>
+                
+                <div class="report-links" id="report-links">
+                    <div class="report-card">
+                        <div class="report-icon">
+                            <i class="fas fa-chart-pie"></i>
+                        </div>
+                        <div class="report-content">
+                            <h3>Actionable Recommendations Report</h3>
+                            <p>Comprehensive analysis with AI-powered retention strategies</p>
+                            <button class="btn btn-outline" id="view-report-btn" disabled>
+                                <i class="fas fa-eye"></i>
+                                View Report
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="report-card">
+                        <div class="report-icon">
+                            <i class="fas fa-database"></i>
+                        </div>
+                        <div class="report-content">
+                            <h3>Prediction Data Export</h3>
+                            <p>Download complete results with predictions and probabilities</p>
+                            <button class="btn btn-outline" id="download-data-btn">
+                                <i class="fas fa-download"></i>
+                                Download Data
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Email Section -->
+            <section class="email-section" id="email-section" style="display: none;">
+                <div class="section-header">
+                    <h2><i class="fas fa-envelope"></i> Share Report</h2>
+                    <p>Send the comprehensive report to marketing and CRM teams via email</p>
+                </div>
+                
+                <form id="email-form" class="email-form">
+                    <div class="form-group">
+                        <label for="recipient-email">Recipient Email Address</label>
+                        <input type="email" id="recipient-email" name="recipient-email" 
+                               placeholder="marketing@company.com" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-success" id="send-email-btn" disabled>
+                        <i class="fas fa-paper-plane"></i>
+                        Send Report
+                    </button>
+                </form>
+                
+                <div class="email-status" id="email-status"></div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2024 Telecom Churn Prediction Platform. Powered by AI & Machine Learning.</p>
+        </footer>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>

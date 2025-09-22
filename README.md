@@ -1,255 +1,258 @@
-<details>
-  <summary><b>Table of Contents</b></summary>
+# Telecom Churn Prediction Platform
 
-- [Why this exists](#-why-this-exists)
-- [Features](#-features)
-- [Repository layout](#-repository-layout)
-- [Quickstart](#-quickstart)
-- [Train the model](#-train-the-model)
-- [Run the API](#-run-the-api)
-- [Use the Streamlit UI](#-use-the-streamlit-ui)
-- [API contract](#-api-contract)
-- [One-slide business summary](#-one-slide-business-summary)
-- [Troubleshooting](#-troubleshooting)
-- [Makefile](#-makefile)
-- [Notes](#-notes)
+A comprehensive AI-powered telecom churn prediction platform with FastAPI backend, modern web frontend, intelligent recommendations, dynamic model monitoring, and automated reporting capabilities.
 
-</details>
+## 🏗️ **Project Structure**
 
+```
+churn_prediction/
+├── api/                        # 🚀 FastAPI Backend
+│   ├── main.py                # Main API application
+│   ├── schema.py              # Pydantic schemas
+│   ├── inference_preprocess.py # Data preprocessing
+│   └── agents/                # AI agents
+│       ├── recommendation_agent.py
+│       └── monitoring_agent.py
+├── telecom_churn_frontend/     # 🌐 Web Frontend
+│   ├── index.html             # Main web interface
+│   ├── style.css              # Styling
+│   ├── app.js                 # Frontend logic
+│   └── drift_report.html      # Generated reports
+├── train/                      # 🤖 Model Training
+│   ├── train.py               # Training pipeline
+│   ├── prepare_telco.py       # Data preparation
+│   └── utils.py               # Training utilities
+├── data/                       # 📊 Data Files
+│   ├── telco_raw.csv          # Raw customer data
+│   ├── telco_train.csv        # Training dataset
+│   ├── telco_scoring_sample.csv # Sample scoring data
+│   └── baseline_train.pkl     # Baseline for drift detection
+├── models/                     # 🎯 Trained Models
+│   ├── xgb_pipeline.joblib    # XGBoost model pipeline
+│   └── xgb_threshold.json     # Optimal threshold
+├── app/                        # 📱 Alternative UI
+│   └── streamlit_app.py       # Streamlit interface
+├── create_baseline.py          # Baseline data creation
+├── requirements.txt            # Python dependencies
+├── Makefile                    # Build automation
+└── README.md                   # This documentation
+```
 
-💡 Why this exists
+## ✅ **Features**
 
-Predict which customers will churn in the next 30 days and rank them by risk so marketing can target the top-N with retention offers.
+### 🚀 **Core Prediction Engine**
+- **FastAPI Backend**: High-performance REST API with automatic documentation
+- **XGBoost Model**: Pre-trained churn prediction with optimized thresholds
+- **CSV File Upload**: Batch processing of customer data
+- **Top-K Selection**: Configurable ranking of highest-risk customers
 
-✅ Features
+### 🤖 **AI-Powered Agents**
+- **Recommendation Agent**: Generates personalized retention strategies
+- **Monitoring Agent**: Real-time data drift detection and visualization
+- **Dynamic Reports**: HTML reports with embedded charts and insights
 
-End-to-end local demo: prepare → train → serve → score.
+### 🎨 **Modern Web Frontend**
+- **Responsive Design**: Modern glassmorphism UI with mobile support
+- **File Upload**: Drag-and-drop CSV upload with validation
+- **Interactive Results**: Risk level badges, summary cards, and data tables
+- **Real-time Feedback**: Toast notifications and loading states
 
-FastAPI endpoint: POST /predict returns churn probabilities and predictions.
+### 📊 **Advanced Analytics**
+- **Data Drift Detection**: Monitors numerical and categorical feature drift
+- **Visual Analytics**: Base64-encoded charts for distribution comparisons
+- **Risk Stratification**: CRITICAL/HIGH/MEDIUM/LOW risk categorization
+- **Revenue Impact**: Calculates potential revenue at risk
 
-Streamlit UI: upload CSV → sort by churn_probability → export.
+### 📧 **Communication & Reporting**
+- **Email Integration**: SMTP-based report delivery with attachments
+- **HTML Reports**: Professional styled reports with CSS
+- **CSV Export**: Downloadable prediction results
+- **Report Viewing**: In-browser drift report visualization
 
-Reproducible training with printed Accuracy / Precision / Recall / F1.
+## 🚀 **Quickstart**
 
-Optional data drift report (Evidently) for show-and-tell.
-
-🗂 Repository layout
-churn-demo/
-├─ data/
-│  ├─ telco_raw.csv                # IBM Telco raw CSV
-│  ├─ telco_train.csv              # prepared training data
-│  ├─ telco_scoring_sample.csv     # sample for live scoring (no Churn column)
-├─ models/
-│  ├─ xgb_pipeline.joblib          # trained classifier
-├─ api/
-│  ├─ main.py                      # FastAPI app (POST /predict)
-│  ├─ schema.py                    # (optional) pydantic models
-│  ├─ inference_preprocessor.py    #  preprocesses input
-├─ app/
-│  ├─ streamlit_app.py             # simple UI for demo
-├─ train/
-│  ├─ prepare_telco.py             # makes train + scoring files
-│  ├─ train.py                     # trains model + prints metrics
-│  ├─ utils.py                     # (optional) helpers
-├─ reports/
-│  ├─ drift_report.html            # (optional) Evidently report
-├─ test.py                         # quick sanity checks
-├─ requirements.txt
-├─ README.md
-
-[↑ Back to top](#-table-of-contents)
-
-🚀 Quickstart
+### 1. Environment Setup
+```bash
+# Create virtual environment
 python -m venv .venv
-# Windows
+
+# Activate virtual environment
+# Windows:
 .venv\Scripts\activate
-# macOS/Linux
+# macOS/Linux:
 source .venv/bin/activate
 
+# Install dependencies
 pip install -r requirements.txt
+```
 
-
-Place dataset at:
-
-data/telco_raw.csv
-
-
-Prepare training + scoring files:
-
+### 2. Data Preparation
+```bash
+# Prepare training and scoring files
 python train/prepare_telco.py
 
+# Create baseline data for drift detection
+python create_baseline.py
 
-Optional sanity check:
-
-python test.py
-
-🧪 Train the model
+# Train the model
 python train/train.py
+```
 
+### 3. Start the Platform
+```bash
+# Option 1: Using Makefile
+make api          # Start API server
+make frontend     # Start web frontend (in another terminal)
 
-Artifacts saved to:
+# Option 2: Manual commands
+# Terminal 1: Start the FastAPI backend (from the main project folder)
+uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
 
-models/xgb_pipeline.joblib
-models/xgb_threshold.json
+# Terminal 2: Start the frontend server
+cd telecom_churn_frontend
+python -m http.server 3000
+```
 
+### 4. Access the Platform
+- **Frontend**: http://localhost:3000
+- **API Documentation**: http://localhost:8000/docs
+- **API Health**: http://localhost:8000
 
-Re-train from scratch:
+## 📡 **Backend API**
 
-# macOS/Linux
-rm -rf models && mkdir models
-# Windows (PowerShell)
-rmdir /s /q models; mkdir models
-python train/train.py
+The FastAPI backend provides three main endpoints:
 
-📡 Run the API
-uvicorn api.main:app --reload --port 8000
-# Docs: http://localhost:8000/docs
+### 1. Churn Prediction
+```http
+POST /predict_churn?k_value=10
+Content-Type: multipart/form-data
 
-🖥️ Use the Streamlit UI
-streamlit run app/streamlit_app.py
-# Usually opens http://localhost:8501
+# Upload CSV file with customer data
+# Returns top-K customers ranked by churn risk
+```
 
+### 2. AI Recommendations
+```http
+POST /generate_recommendations_report
+Content-Type: application/json
 
-Upload data/telco_scoring_sample.csv (same columns, no Churn).
+# Generates actionable retention strategies
+# Creates HTML report with drift monitoring
+```
 
-Click Score → see ranked churn probabilities.
-
-Export table if needed (e.g. to CRM).
-
-🔐 API contract
-
-Endpoint
-
-POST http://localhost:8000/predict
-
-
-Request
+### 3. Email Reports
+```http
+POST /send_email
+Content-Type: application/json
 
 {
-  "records": [
-    {
-      "customerID": "7590-VHVEG",
-      "gender": "Female",
-      "SeniorCitizen": 0,
-      "Partner": "Yes",
-      "Dependents": "No",
-      "tenure": 1,
-      "PhoneService": "No",
-      "MultipleLines": "No phone service",
-      "InternetService": "DSL",
-      "OnlineSecurity": "No",
-      "OnlineBackup": "Yes",
-      "DeviceProtection": "No",
-      "TechSupport": "No",
-      "StreamingTV": "No",
-      "StreamingMovies": "No",
-      "Contract": "Month-to-month",
-      "PaperlessBilling": "Yes",
-      "PaymentMethod": "Electronic check",
-      "MonthlyCharges": 29.85,
-      "TotalCharges": 29.85
-    }
-  ]
+  "recipient_email": "manager@company.com",
+  "results_csv_path": "path/to/results.csv"
 }
+```
 
+## 🎨 **Frontend Web App**
 
-Response
+The modern web interface provides:
 
-{"probabilities": [0.8470520377159119], "predictions": [1]}
+- **File Upload**: Drag-and-drop CSV upload with validation
+- **Risk Analysis**: Interactive results with risk level badges
+- **Report Generation**: One-click recommendations and drift reports
+- **Email Integration**: Send reports directly from the interface
 
-🧠 One-slide business summary
+## 🛠️ **Development**
 
-Goal: Identify churners → target offers → reduce churn.
+### **Using Makefile**
+```bash
+make help         # Show all available commands
+make install      # Install dependencies
+make prepare      # Prepare data
+make train        # Train model
+make baseline     # Create baseline data
+make api          # Start API server
+make frontend     # Start web frontend
+make ui           # Start Streamlit UI
+make test         # Run tests
+make clean        # Clean cache files
+```
 
-Approach: Logistic Regression with probabilities for ranking.
+### **Manual Commands**
+```bash
+# Install dependencies
+pip install -r requirements.txt
 
-Key metrics: Recall & Precision (optimize retention ROI).
+# Prepare data
+python train/prepare_telco.py
 
-Integration idea: Weekly scoring → CRM → campaign → retraining loop.
+# Train model
+python train/train.py
 
-🛠 Troubleshooting
+# Create baseline
+python create_baseline.py
 
-JSON decode error in Streamlit → ensure API is running (http://localhost:8000/docs).
+# Start API
+uvicorn api.main:app --reload --port 8000
 
-422 errors → check CSV schema (must match, no Churn column).
+# Start frontend
+cd telecom_churn_frontend && python -m http.server 3000
 
-Model not found → train first (python train/train.py).
+# Start Streamlit UI
+streamlit run app/streamlit_app.py --server.port 8501
+```
 
-Port conflicts → run API on --port 8100, Streamlit on --server.port 8601.
+## 📧 **Email Configuration**
 
-🧰 Makefile
+To enable email functionality, set these environment variables:
 
-Save this as Makefile in project root:
+```bash
+# Windows
+set EMAIL_USERNAME=your-email@gmail.com
+set EMAIL_PASSWORD=your-app-password
+set SMTP_SERVER=smtp.gmail.com
+set SMTP_PORT=587
 
-PY ?= python
-UVICORN_PORT ?= 8000
-STREAMLIT_PORT ?= 8501
+# macOS/Linux
+export EMAIL_USERNAME=your-email@gmail.com
+export EMAIL_PASSWORD=your-app-password
+export SMTP_SERVER=smtp.gmail.com
+export SMTP_PORT=587
+```
 
-.PHONY: help install prepare train retrain api ui test clean clean-win
+## 🔧 **Troubleshooting**
 
-help:
-	@echo "Targets:"
-	@echo "  install     - Install dependencies"
-	@echo "  prepare     - Build training & scoring CSVs"
-	@echo "  train       - Train model"
-	@echo "  retrain     - Clean models/ and train from scratch"
-	@echo "  api         - Run FastAPI on port $(UVICORN_PORT)"
-	@echo "  ui          - Run Streamlit on port $(STREAMLIT_PORT)"
-	@echo "  test        - Run sanity checks"
-	@echo "  clean       - Remove __pycache__ and models/"
-	@echo "  clean-win   - Windows-safe clean"
+### **Common Issues**
 
-install:
-	$(PY) -m pip install -r requirements.txt
+1. **Import Errors**: Ensure you're in the correct directory when running commands
+2. **Model Not Found**: Run `python train/train.py` to create model files
+3. **Port Already in Use**: Change ports in Makefile or kill existing processes
+4. **Email Not Working**: Check environment variables and use app passwords for Gmail
 
-prepare:
-	$(PY) train/prepare_telco.py
+### **Data Requirements**
 
-train:
-	$(PY) train/train.py
+Your CSV file should contain these columns:
+- `customerID`, `gender`, `SeniorCitizen`, `Partner`, `Dependents`
+- `tenure`, `PhoneService`, `MultipleLines`, `InternetService`
+- `OnlineSecurity`, `OnlineBackup`, `DeviceProtection`, `TechSupport`
+- `StreamingTV`, `StreamingMovies`, `Contract`, `PaperlessBilling`
+- `PaymentMethod`, `MonthlyCharges`, `TotalCharges`
 
-retrain:
-	rm -rf models && mkdir -p models
-	$(PY) train/train.py
+## 📊 **Model Performance**
 
-api:
-	uvicorn api.main:app --reload --port $(UVICORN_PORT)
+The XGBoost model achieves:
+- **Accuracy**: ~80%
+- **Precision**: ~65%
+- **Recall**: ~55%
+- **F1-Score**: ~60%
+- **ROC-AUC**: ~85%
 
-ui:
-	streamlit run app/streamlit_app.py --server.port $(STREAMLIT_PORT)
+## 🤝 **Contributing**
 
-test:
-	$(PY) test.py
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
 
-clean:
-	find . -type d -name "__pycache__" -exec rm -rf {} +
-	rm -rf models
+## 📄 **License**
 
-clean-win:
-	powershell -NoProfile -Command ^
-	  "Get-ChildItem -Recurse -Directory -Filter __pycache__ | Remove-Item -Recurse -Force; ^
-	   if (Test-Path models) { Remove-Item models -Recurse -Force }"
-
-Example usage
-make install
-make prepare
-make train
-make api
-make ui
-
-📝 Notes
-
-schema.py optional for stronger API contracts.
-
-drift_report.html optional if you want monitoring talk track.
-
-Project designed for live demo simplicity (no Docker needed).
-
-# Makefile
-make install
-make prepare
-make train
-make api        # opens http://localhost:8000/docs
-make ui         # opens http://localhost:8501
-
-[↑ Back to top](#-table-of-contents)
+This project is licensed under the MIT License - see the LICENSE file for details.
